@@ -140,7 +140,6 @@ footer { font-size: 12px; color: var(--muted); }
   <footer>Sources: Reserve Bank of Australia, Statistical Table F1 (cash rate target, daily); Yahoo Finance, ^AXJO daily prices. Dates are ASX trading days in Sydney time. Volatility is the standard deviation of 14 daily log returns × √252.</footer>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.35.2/plotly.min.js"></script>
 <script>
 const D = /*__DATA__*/null;
 const $ = id => document.getElementById(id);
@@ -227,7 +226,22 @@ function draw() {
       marker: { size: 9, color: css({ GREEN: "--green", AMBER: "--amber", RED: "--red", GREY: "--grey" }[D.rag]) }, hoverinfo: "skip" },
   ], { ...base, yaxis: { ...base.yaxis, ticksuffix: "%", range: [0, top] } }, cfg);
 }
-if (window.Plotly) { draw(); matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw);
-  new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] }); }
-else document.querySelectorAll(".plot").forEach(p => p.textContent = "Charts need an internet connection to load the charting library.");
+// Load the chart library, trying three CDNs in turn so one blocked or missing host
+// does not leave the charts blank.
+const CDNS = ["https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js",
+              "https://unpkg.com/plotly.js-dist-min@2.35.2/plotly.min.js",
+              "https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.35.2/plotly.min.js"];
+function loadPlotly(i) {
+  if (i >= CDNS.length) {
+    document.querySelectorAll(".plot").forEach(p => p.textContent = "Charts could not load: the charting library was blocked or the page is offline.");
+    return;
+  }
+  const sc = document.createElement("script");
+  sc.src = CDNS[i];
+  sc.onload = () => { draw(); matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw);
+    new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] }); };
+  sc.onerror = () => loadPlotly(i + 1);
+  document.head.appendChild(sc);
+}
+loadPlotly(0);
 </script>
