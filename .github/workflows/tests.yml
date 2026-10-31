@@ -1,0 +1,13 @@
+# Guardrail: every pull request (including AI-written code) must pass the tests
+# before it can be merged into main.
+name: tests
+on: [pull_request, push]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install -r requirements.txt
+      - run: PYTHONPATH=src pytest -q

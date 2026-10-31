@@ -1,0 +1,233 @@
+<title>ASX 200 Market Watch</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: summary strip (signal + three figures) above three stacked charts sharing one time axis, then data health. */
+:root {
+  --bg: #f6f7f8; --surface: #ffffff; --fg: #17212b; --muted: #5b6875; --line: #dde2e7;
+  --accent: #0f5c6e; --accent-soft: #d8e9ed; --rate: #a8551b;
+  --green: #1d7a46; --green-bg: #e3f3e9; --amber: #a86a00; --amber-bg: #fdf0d5;
+  --red: #b3261e; --red-bg: #fbe4e2; --grey: #6b7580; --grey-bg: #eceff2;
+  --band-amber: rgba(214, 140, 0, .10); --band-red: rgba(179, 38, 30, .09);
+  --sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f151b; --surface: #161e26; --fg: #e4e9ee; --muted: #93a1ae; --line: #26313c;
+  --accent: #5fb8cc; --accent-soft: #173640; --rate: #e5965c;
+  --green: #5cc98a; --green-bg: #163324; --amber: #f0b440; --amber-bg: #3a2c0e; --red: #f2847c;
+  --red-bg: #3d1b19; --grey: #9aa5b0; --grey-bg: #222c35;
+  --band-amber: rgba(240, 180, 64, .10); --band-red: rgba(242, 132, 124, .10); color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0f151b; --surface: #161e26; --fg: #e4e9ee; --muted: #93a1ae; --line: #26313c;
+  --accent: #5fb8cc; --accent-soft: #173640; --rate: #e5965c;
+  --green: #5cc98a; --green-bg: #163324; --amber: #f0b440; --amber-bg: #3a2c0e; --red: #f2847c;
+  --red-bg: #3d1b19; --grey: #9aa5b0; --grey-bg: #222c35;
+  --band-amber: rgba(240, 180, 64, .10); --band-red: rgba(242, 132, 124, .10); color-scheme: dark; }
+
+body { background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1080px; margin: 0 auto; padding-block: 24px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 20px; }
+.banner { background: var(--amber-bg); color: var(--fg); border: 1px solid var(--line); border-radius: 6px;
+  padding: 8px 12px; font-size: 13px; }
+header { display: grid; gap: 4px; }
+.eyebrow { font: 500 12px/1.2 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { font-size: 22px; font-weight: 600; margin: 0; text-wrap: balance; max-width: 62ch; line-height: 1.3; }
+.period { color: var(--muted); font-size: 13px; }
+
+.summary { display: grid; grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 860px) { .summary { grid-template-columns: repeat(3, minmax(0, 1fr)); } .signal { grid-column: 1 / -1; } }
+@media (max-width: 520px) { .summary { grid-template-columns: minmax(0, 1fr); } }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px;
+  display: grid; gap: 4px; align-content: start; min-width: 0; }
+.tile .k { font-size: 12px; color: var(--muted); }
+.tile .v { font: 500 24px/1.15 var(--mono); font-variant-numeric: tabular-nums; }
+.tile .d { font-size: 13px; color: var(--muted); }
+.signal { border-left-width: 6px; }
+.signal[data-rag="GREEN"] { border-left-color: var(--green); background: var(--green-bg); }
+.signal[data-rag="AMBER"] { border-left-color: var(--amber); background: var(--amber-bg); }
+.signal[data-rag="RED"] { border-left-color: var(--red); background: var(--red-bg); }
+.signal[data-rag="GREY"] { border-left-color: var(--grey); background: var(--grey-bg); }
+.pill { display: inline-flex; align-items: center; gap: 8px; font: 600 13px/1 var(--mono); letter-spacing: .06em; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: currentColor; }
+.signal[data-rag="GREEN"] .pill { color: var(--green); } .signal[data-rag="AMBER"] .pill { color: var(--amber); }
+.signal[data-rag="RED"] .pill { color: var(--red); } .signal[data-rag="GREY"] .pill { color: var(--grey); }
+.signal .act { font-size: 14px; color: var(--fg); }
+
+section.chart { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px 6px; min-width: 0; }
+section.chart h2 { font-size: 15px; font-weight: 600; margin: 0; }
+section.chart p { margin: 2px 0 0; font-size: 13px; color: var(--muted); max-width: 75ch; }
+.plot { width: 100%; height: 260px; }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px; color: var(--muted); margin-top: 6px; }
+.legend i { display: inline-block; width: 14px; height: 3px; vertical-align: middle; margin-right: 6px; }
+
+.rel { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; display: grid; gap: 12px; min-width: 0; }
+.rel h2 { font-size: 15px; font-weight: 600; margin: 0; }
+.rel .row { display: grid; grid-template-columns: minmax(150px, 220px) minmax(0, 1fr); gap: 4px 16px; border-top: 1px solid var(--line); padding-top: 10px; }
+@media (max-width: 560px) { .rel .row { grid-template-columns: minmax(0, 1fr); } }
+.rel .pair { font-weight: 600; font-size: 14px; }
+.rel .txt { font-size: 14px; min-width: 0; }
+.rel table { border-collapse: collapse; font-size: 13px; margin-top: 6px; font-variant-numeric: tabular-nums; }
+.rel th, .rel td { text-align: right; padding: 3px 12px 3px 0; border-bottom: 1px solid var(--line); }
+.rel th:first-child, .rel td:first-child { text-align: left; }
+.rel th { color: var(--muted); font-weight: 500; }
+.tablewrap { overflow-x: auto; }
+.rel .foot { font-size: 12px; color: var(--muted); }
+details.health { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; font-size: 13px; }
+details.health summary { cursor: pointer; font-weight: 600; }
+details.health summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.hgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px 24px; margin-top: 10px; }
+.hgrid div { min-width: 0; overflow-wrap: anywhere; }
+.hgrid b { display: block; font-weight: 500; }
+.ok { color: var(--green); } .bad { color: var(--red); }
+footer { font-size: 12px; color: var(--muted); }
+</style>
+
+<div class="wrap">
+  <!--__BANNER__-->
+  <header>
+    <div class="eyebrow">Really Big Bank · Post-trade market intelligence · S&amp;P/ASX 200 and RBA cash rate</div>
+    <h1 id="headline"></h1>
+    <div class="period" id="period"></div>
+  </header>
+
+  <div class="summary">
+    <div class="tile signal" id="signal">
+      <div class="pill"><span class="dot"></span><span id="ragword"></span></div>
+      <div class="act" id="ragaction"></div>
+      <div class="d" id="ragwhy"></div>
+    </div>
+    <div class="tile"><div class="k">ASX 200 close</div><div class="v" id="t-close"></div><div class="d" id="t-close-d"></div></div>
+    <div class="tile"><div class="k">Trading volume, 20-day average</div><div class="v" id="t-vol"></div><div class="d" id="t-vol-d"></div></div>
+    <div class="tile"><div class="k">RBA cash rate target</div><div class="v" id="t-rate"></div><div class="d" id="t-rate-d"></div></div>
+  </div>
+
+  <section class="chart">
+    <h2>Index level against the cash rate</h2>
+    <p id="c1-note"></p>
+    <div class="plot" id="c1"></div>
+    <div class="legend"><span><i style="background:var(--accent)"></i>ASX 200 close (left axis)</span><span><i style="background:var(--rate)"></i>Cash rate target, % (right axis)</span></div>
+  </section>
+
+  <section class="chart">
+    <h2>Daily volume and its 20-day average</h2>
+    <p>Bars are each day's traded volume. The line is the average of the last 20 trading days, so a bar well above the line is an unusually busy day.</p>
+    <div class="plot" id="c2"></div>
+    <div class="legend"><span><i style="background:var(--accent-soft);height:8px"></i>Daily volume (millions of shares)</span><span><i style="background:var(--accent)"></i>20-day average</span></div>
+  </section>
+
+  <section class="chart">
+    <h2>Volatility signal</h2>
+    <p id="c3-note"></p>
+    <div class="plot" id="c3"></div>
+    <div class="legend"><span><i style="background:var(--fg)"></i>14-day volatility, annualised %</span><span><i style="background:var(--band-amber);height:8px"></i>Amber zone (75th–90th percentile of past year)</span><span><i style="background:var(--band-red);height:8px"></i>Red zone (90th percentile and above)</span></div>
+  </section>
+
+  <section class="rel" aria-labelledby="rel-h">
+    <h2 id="rel-h">How the three series relate</h2>
+    <div class="row"><div class="pair">ASX 200 ↔ volatility</div><div class="txt" id="rel1"></div></div>
+    <div class="row"><div class="pair">Cash rate ↔ ASX 200</div><div class="txt" id="rel2"></div></div>
+    <div class="row"><div class="pair">Cash rate ↔ volatility</div><div class="txt" id="rel3"></div></div>
+    <div class="foot">These figures show which series move together. They do not show that one causes the other.</div>
+  </section>
+
+  <details class="health">
+    <summary>Data health and method</summary>
+    <div class="hgrid" id="health"></div>
+  </details>
+  <footer>Sources: Reserve Bank of Australia, Statistical Table F1 (cash rate target, daily); Yahoo Finance, ^AXJO daily prices. Dates are ASX trading days in Sydney time. Volatility is the standard deviation of 14 daily log returns × √252.</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.35.2/plotly.min.js"></script>
+<script>
+const D = /*__DATA__*/null;
+const $ = id => document.getElementById(id);
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const fmt = (x, d = 0) => x == null ? "–" : Number(x).toLocaleString("en-AU", { minimumFractionDigits: d, maximumFractionDigits: d });
+const sign = x => x == null ? "" : (x > 0 ? "+" : x < 0 ? "−" : "") + fmt(Math.abs(x), 1);
+
+$("headline").textContent = D.headline;
+$("period").textContent = D.period + " · " + D.days_in_window + " trading days";
+$("signal").dataset.rag = D.rag;
+$("ragword").textContent = D.rag + " · " + D.rag_label;
+$("ragaction").textContent = D.rag_action;
+$("ragwhy").textContent = D.vol_now == null ? D.rag_reason :
+  `14-day volatility ${fmt(D.vol_now, 1)}%, higher than ${fmt(D.vol_rank)}% of days in the past year. Flagged amber or red on ${D.days_flagged} of ${D.days_in_window} days.`;
+$("t-close").textContent = fmt(D.close);
+$("t-close-d").textContent = `${sign(D.chg_90)}% over 90 days · ${sign(D.roc20)}% over 20 days`;
+const vma = D.series.volume_ma20_m.filter(v => v != null);
+$("t-vol").textContent = vma.length ? fmt(vma[vma.length - 1], 0) + "m" : "–";
+$("t-vol-d").textContent = D.vol_trend == null ? "Not enough valid volume days" : `${sign(D.vol_trend)}% vs start of period`;
+$("t-rate").textContent = fmt(D.rate, 2) + "%";
+$("t-rate-d").textContent = D.rate_chg_bps ? `${D.rate_chg_bps > 0 ? "+" : "−"}${Math.abs(D.rate_chg_bps)} bp over 90 days` : "Unchanged over 90 days";
+
+const ev = D.events;
+$("c1-note").textContent = ev.length
+  ? ev.map(e => `RBA ${e.bps > 0 ? "raised" : "cut"} the rate ${Math.abs(e.bps)} bp on ${new Date(e.date).toLocaleDateString("en-AU", { day: "numeric", month: "short" })}` +
+      (e.index_move_10d_pct == null ? "; too recent to measure the market's response." : `; the index moved ${sign(e.index_move_10d_pct)}% over the next 10 trading days.`)).join(" ")
+  : "The cash rate did not change in this period, so index moves reflect other drivers such as earnings and global markets.";
+$("c3-note").textContent = `The shaded zones come from the past year of this index's own volatility, so "unusual" adapts to the market. Today: ${D.p75 == null ? "–" : `amber from ${fmt(D.p75, 1)}%, red from ${fmt(D.p90, 1)}%`}.`;
+
+const R = D.relations, iv = R.index_vs_volatility;
+$("rel1").textContent = iv.r == null ? "Not enough days in the window to measure." :
+  `Over the last 90 days the link was ${iv.strength} (correlation ${fmt(iv.r, 2)} between the 20-day change in the index and 14-day volatility). ` +
+  (iv.r < 0 ? "Volatility was higher when the index had been falling." : "Volatility was higher when the index had been rising.");
+const evs = R.rate_events;
+$("rel2").innerHTML = evs.length ?
+  `Index move over the 10 trading days from each cash rate change:<div class="tablewrap"><table><tr><th>Date</th><th>Change</th><th>ASX 200, next 10 days</th></tr>` +
+  evs.map(e => `<tr><td>${new Date(e.date).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}</td><td>${e.bps > 0 ? "+" : "−"}${Math.abs(e.bps)} bp</td><td>${sign(e.index_move_pct)}%</td></tr>`).join("") +
+  `</table></div>` : "No cash rate change in the data yet.";
+$("rel3").textContent = R.avg_vol_change_after_rate_move == null ? "No cash rate change in the data yet." :
+  `On average, 14-day volatility was ${fmt(Math.abs(R.avg_vol_change_after_rate_move), 1)} points ${R.avg_vol_change_after_rate_move >= 0 ? "higher" : "lower"} in the 10 trading days after a rate change than in the 10 days before (` +
+  evs.map(e => `${fmt(e.vol_before, 1)}% → ${fmt(e.vol_after, 1)}%`).join(", ") + ").";
+
+const H = D.health, src = H.sources || {};
+const row = (k, v, cls) => `<div><b>${k}</b><span class="${cls || ""}">${v}</span></div>`;
+$("health").innerHTML = Object.entries(src).map(([k, s]) =>
+    row(k === "rba" ? "RBA cash rate" : "ASX 200 prices",
+      (s.stale ? "Stale: " + (s.reason || "last load failed") : "Loaded this run") +
+      (s.last_success_utc ? ` · last good load ${s.last_success_utc.replace("T", " ").slice(0, 16)} UTC` : "") +
+      (s.rows_quarantined != null ? ` · ${s.rows_quarantined} rows quarantined` : ""), s.stale ? "bad" : "ok")).join("") +
+  row("Volume repairs", `${H.volume_days_blanked} day(s) in view had zero or missing volume; set blank, not zero, and excluded from the average`) +
+  row("Calendar alignment", `${H.carried_forward_days} trading day(s) used the previous RBA value (no RBA row that day)`) +
+  row("Run", `${H.mode} · ${H.run_id}`);
+
+function draw() {
+  const s = D.series, fg = css("--fg"), mu = css("--muted"), ln = css("--line");
+  const base = { margin: { l: 52, r: 52, t: 8, b: 30 }, paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+    font: { family: css("--sans"), size: 12, color: mu }, showlegend: false, hovermode: "x unified",
+    hoverlabel: { bgcolor: css("--surface"), bordercolor: ln, font: { color: fg } },
+    xaxis: { type: "date", gridcolor: ln, linecolor: ln, tickformat: "%d %b", fixedrange: true },
+    yaxis: { gridcolor: ln, zeroline: false, fixedrange: true } };
+  const cfg = { displayModeBar: false, responsive: true };
+
+  const shapes = ev.map(e => ({ type: "line", xref: "x", yref: "paper", x0: e.date, x1: e.date, y0: 0, y1: 1,
+    line: { color: css("--rate"), width: 1, dash: "dot" } }));
+  Plotly.react("c1", [
+    { x: s.date, y: s.close, name: "ASX 200", type: "scatter", mode: "lines", line: { color: css("--accent"), width: 2 }, hovertemplate: "%{y:,.0f}" },
+    { x: s.date, y: s.rate, name: "Cash rate", yaxis: "y2", type: "scatter", mode: "lines", line: { color: css("--rate"), width: 2, shape: "hv" }, hovertemplate: "%{y:.2f}%" },
+  ], { ...base, shapes, yaxis: { ...base.yaxis, tickformat: ",.0f" },
+       yaxis2: { overlaying: "y", side: "right", ticksuffix: "%", showgrid: false, fixedrange: true, zeroline: false,
+                 range: (() => { const r = s.rate.filter(v => v != null); const lo = Math.min(...r), hi = Math.max(...r); return [lo - 0.5, hi + 0.5]; })() } }, cfg);
+
+  Plotly.react("c2", [
+    { x: s.date, y: s.volume_m, type: "bar", marker: { color: css("--accent-soft") }, name: "Volume", hovertemplate: "%{y:,.0f}m" },
+    { x: s.date, y: s.volume_ma20_m, type: "scatter", mode: "lines", line: { color: css("--accent"), width: 2 }, name: "20-day avg", connectgaps: false, hovertemplate: "%{y:,.0f}m" },
+  ], { ...base, bargap: 0.25, yaxis: { ...base.yaxis, ticksuffix: "m" } }, cfg);
+
+  const top = Math.max(...s.vol14.filter(v => v != null), ...s.p90.filter(v => v != null)) * 1.25;
+  Plotly.react("c3", [
+    { x: s.date, y: s.p75, type: "scatter", mode: "lines", line: { width: 0 }, hoverinfo: "skip" },
+    { x: s.date, y: s.p90, type: "scatter", mode: "lines", line: { width: 0 }, fill: "tonexty", fillcolor: css("--band-amber"), name: "Amber from", hovertemplate: "%{y:.1f}%" },
+    { x: s.date, y: s.p90.map(() => top), type: "scatter", mode: "lines", line: { width: 0 }, fill: "tonexty", fillcolor: css("--band-red"), hoverinfo: "skip" },
+    { x: s.date, y: s.vol14, type: "scatter", mode: "lines", line: { color: fg, width: 2 }, name: "Volatility", hovertemplate: "%{y:.1f}%" },
+    { x: [s.date[s.date.length - 1]], y: [s.vol14[s.vol14.length - 1]], type: "scatter", mode: "markers",
+      marker: { size: 9, color: css({ GREEN: "--green", AMBER: "--amber", RED: "--red", GREY: "--grey" }[D.rag]) }, hoverinfo: "skip" },
+  ], { ...base, yaxis: { ...base.yaxis, ticksuffix: "%", range: [0, top] } }, cfg);
+}
+if (window.Plotly) { draw(); matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw);
+  new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] }); }
+else document.querySelectorAll(".plot").forEach(p => p.textContent = "Charts need an internet connection to load the charting library.");
+</script>

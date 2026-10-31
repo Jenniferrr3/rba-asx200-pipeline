@@ -1,0 +1,36 @@
+digraph pipeline {
+  graph [rankdir=TB, fontname="Helvetica", fontsize=11, nodesep=0.35, ranksep=0.45, bgcolor="white", pad=0.3,
+         label="Really Big Bank · Market intelligence pipeline (RBA cash rate + S&P/ASX 200)", labelloc=t, labeljust=l, fontcolor="#17212b"];
+  node  [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=10, color="#9aa7b3", fillcolor="#ffffff", fontcolor="#17212b", margin="0.15,0.08"];
+  edge  [color="#5b6875", arrowsize=0.7, fontname="Helvetica", fontsize=8, fontcolor="#5b6875"];
+
+  sched [label="Scheduler\nGitHub Actions cron\nweekdays 18:30 Sydney\n(after ASX close)", fillcolor="#eef2f5"];
+
+  subgraph cluster_src { label="1 · Sources"; style="rounded,dashed"; color="#c5ced6"; fontcolor="#5b6875"; labeljust=r;
+    rba [label="RBA Statistical Table F1\nCash Rate Target (FIRMMCRTD)\nCSV, daily, Sydney dates"];
+    yf  [label="Yahoo Finance ^AXJO\nS&P/ASX 200 daily OHLCV\nvia yfinance, +10/+11 offset"];
+  }
+  subgraph cluster_ing { label="2 · Ingest"; style="rounded,dashed"; color="#c5ced6"; fontcolor="#5b6875"; labeljust=r;
+    fetch [label="Fetch with retry\n3 attempts, 2s → 4s backoff\n20s timeout"];
+  }
+  subgraph cluster_raw { label="3 · Store raw (immutable)"; style="rounded,dashed"; color="#c5ced6"; fontcolor="#5b6875"; labeljust=r;
+    raw [label="data/raw/<source>/\ningest_date=YYYY-MM-DD/<run_id>.csv\nbytes exactly as received", fillcolor="#d8e9ed"];
+  }
+  subgraph cluster_tr { label="4 · Transform (separate layer, rebuilt from raw)"; style="rounded,dashed"; color="#c5ced6"; fontcolor="#5b6875"; labeljust=r;
+    val [label="Validate\nschema check → stop load if changed\nrow rules → pass / quarantine"];
+    cur [label="Curated tables\nrba_cash_rate_daily\nasx200_daily + trading calendar", fillcolor="#d8e9ed"];
+    met [label="Align + calculate\nASX calendar spine, Sydney date\nas-of join of cash rate\n20d avg volume · 14d volatility\n20d rate of change · RAG"];
+  }
+  subgraph cluster_srv { label="5 · Serve"; style="rounded,dashed"; color="#c5ced6"; fontcolor="#5b6875"; labeljust=r;
+    srv [label="dashboard_daily\n+ run_status.json\n(the only tables the dashboard reads)", fillcolor="#d8e9ed"];
+    dash [label="90-day dashboard\nmanagers, non-technical", fillcolor="#e3f3e9"];
+  }
+  ql [label="Quality log (every layer)\nrun_log.jsonl · dq_log.csv · quarantine.csv\nrows in = rows passed + rows quarantined", shape=note, fillcolor="#fdf0d5", color="#d4a84a"];
+
+  sched -> fetch [style=dashed];
+  rba -> fetch; yf -> fetch;
+  fetch -> raw [label="ok"];
+  fetch -> raw [label="timeout: use last good raw,\nmark STALE", style=dashed, color="#b3261e", fontcolor="#b3261e"];
+  raw -> val -> cur -> met -> srv -> dash;
+  fetch -> ql [style=dotted, arrowhead=none]; val -> ql [style=dotted, label="rejects + reason"]; srv -> ql [style=dotted, arrowhead=none, label="freshness"];
+}

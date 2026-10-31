@@ -1,0 +1,42 @@
+# Scheduled, repeatable ingestion. Runs after the ASX close on weekdays.
+# 07:30 UTC = 18:30 AEDT (summer) / 17:30 AEST (winter); both are after the 16:00 close
+# and after the RBA publishes the day's cash rate figures.
+name: daily-load
+on:
+  schedule:
+    - cron: "30 7 * * 1-5"
+  workflow_dispatch: {}          # manual "run now" button
+
+permissions:
+  contents: write                # to commit the refreshed data and dashboard
+
+jobs:
+  load:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install -r requirements.txt
+      - name: Tests must pass before any data is loaded
+        run: PYTHONPATH=src pytest -q
+      - name: Run pipeline (live sources)
+        run: PYTHONPATH=src python -m rbabank.pipeline --dashboard
+      - name: Fail the job loudly if a source is stale, so someone is notified
+        run: |
+          python - <<'EOF'
+          import json, sys
+          s = json.load(open("data/serve/run_status.json"))
+          stale = [k for k, v in s["sources"].items() if v.get("stale")]
+          if stale:
+              print("STALE SOURCES:", stale); sys.exit(1)
+          EOF
+      - name: Commit refreshed data
+        if: always()
+        run: |
+          git config user.name "pipeline-bot"
+          git config user.email "pipeline-bot@users.noreply.github.com"
+          git add data docs/dashboard.html
+          git commit -m "Daily load $(date -u +%F)" || echo "nothing to commit"
+          git push
