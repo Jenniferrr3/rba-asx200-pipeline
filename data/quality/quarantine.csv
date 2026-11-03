@@ -1,2 +1,3 @@
 quarantined_at_utc,run_id,source,reason,record
 2026-11-02T17:24:32+00:00,20261102T172430Z-d50a14,rba,missing_cash_rate_target,"{""date_raw"": ""02-Nov-2026"", ""cash_rate_target"": """", ""interbank_overnight_rate"": """"}"
+2026-11-03T15:26:29+00:00,20261103T152628Z-8443fe,rba,missing_cash_rate_target,"{""date_raw"": ""03-Nov-2026"", ""cash_rate_target"": """", ""interbank_overnight_rate"": """"}"
