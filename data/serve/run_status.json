@@ -1,22 +1,22 @@
 {
-  "run_id": "20261105T154442Z-6a268d",
-  "started_utc": "2026-11-05T15:44:42+00:00",
+  "run_id": "20261106T151937Z-c86dea",
+  "started_utc": "2026-11-06T15:19:37+00:00",
   "mode": "live",
   "simulate": null,
   "sources": {
     "rba": {
-      "raw_file": "data/raw/rba/ingest_date=2026-11-05/20261105T154442Z-6a268d.csv",
+      "raw_file": "data/raw/rba/ingest_date=2026-11-06/20261106T151937Z-c86dea.csv",
       "stale": false,
       "loaded": true,
-      "rows_passed": 4010,
+      "rows_passed": 4011,
       "rows_quarantined": 1,
       "flags": {
         "interbank_rate_blank_kept": 0
       },
-      "last_success_utc": "2026-11-05T15:44:43+00:00"
+      "last_success_utc": "2026-11-06T15:19:38+00:00"
     },
     "asx200": {
-      "raw_file": "data/raw/asx200/ingest_date=2026-11-05/20261105T154442Z-6a268d.csv",
+      "raw_file": "data/raw/asx200/ingest_date=2026-11-06/20261106T151937Z-c86dea.csv",
       "stale": false,
       "loaded": true,
       "rows_passed": 508,
@@ -24,10 +24,10 @@
       "flags": {
         "zero_or_missing_volume_set_blank": 2
       },
-      "last_success_utc": "2026-11-05T15:44:44+00:00"
+      "last_success_utc": "2026-11-06T15:19:40+00:00"
     }
   },
   "serve_built": true,
-  "latest_trade_date": "2026-11-05",
-  "finished_utc": "2026-11-05T15:44:44+00:00"
+  "latest_trade_date": "2026-11-06",
+  "finished_utc": "2026-11-06T15:19:40+00:00"
 }

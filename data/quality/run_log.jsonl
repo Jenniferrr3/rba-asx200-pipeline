@@ -26,3 +26,10 @@
 {"ts_utc": "2026-11-05T15:44:44+00:00", "run_id": "20261105T154442Z-6a268d", "source": "asx200", "stage": "land_raw", "status": "ok", "path": "data/raw/asx200/ingest_date=2026-11-05/20261105T154442Z-6a268d.csv"}
 {"ts_utc": "2026-11-05T15:44:44+00:00", "run_id": "20261105T154442Z-6a268d", "source": "asx200", "stage": "curated", "status": "ok", "rows": 508, "quarantined": 0}
 {"ts_utc": "2026-11-05T15:44:44+00:00", "run_id": "20261105T154442Z-6a268d", "source": "all", "stage": "serve", "status": "ok", "rows": 508}
+{"ts_utc": "2026-11-06T15:19:38+00:00", "run_id": "20261106T151937Z-c86dea", "source": "rba", "stage": "fetch", "status": "ok", "attempt": 1, "bytes": 309046}
+{"ts_utc": "2026-11-06T15:19:38+00:00", "run_id": "20261106T151937Z-c86dea", "source": "rba", "stage": "land_raw", "status": "ok", "path": "data/raw/rba/ingest_date=2026-11-06/20261106T151937Z-c86dea.csv"}
+{"ts_utc": "2026-11-06T15:19:38+00:00", "run_id": "20261106T151937Z-c86dea", "source": "rba", "stage": "curated", "status": "ok", "rows": 4011, "quarantined": 1}
+{"ts_utc": "2026-11-06T15:19:40+00:00", "run_id": "20261106T151937Z-c86dea", "source": "asx200", "stage": "fetch", "status": "ok", "attempt": 1, "bytes": 52101}
+{"ts_utc": "2026-11-06T15:19:40+00:00", "run_id": "20261106T151937Z-c86dea", "source": "asx200", "stage": "land_raw", "status": "ok", "path": "data/raw/asx200/ingest_date=2026-11-06/20261106T151937Z-c86dea.csv"}
+{"ts_utc": "2026-11-06T15:19:40+00:00", "run_id": "20261106T151937Z-c86dea", "source": "asx200", "stage": "curated", "status": "ok", "rows": 508, "quarantined": 0}
+{"ts_utc": "2026-11-06T15:19:40+00:00", "run_id": "20261106T151937Z-c86dea", "source": "all", "stage": "serve", "status": "ok", "rows": 508}
