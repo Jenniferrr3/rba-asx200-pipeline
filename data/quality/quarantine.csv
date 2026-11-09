@@ -4,3 +4,4 @@ quarantined_at_utc,run_id,source,reason,record
 2026-11-04T15:42:21+00:00,20261104T154220Z-2a4b06,rba,missing_cash_rate_target,"{""date_raw"": ""04-Nov-2026"", ""cash_rate_target"": """", ""interbank_overnight_rate"": """"}"
 2026-11-05T15:44:43+00:00,20261105T154442Z-6a268d,rba,missing_cash_rate_target,"{""date_raw"": ""05-Nov-2026"", ""cash_rate_target"": """", ""interbank_overnight_rate"": """"}"
 2026-11-06T15:19:38+00:00,20261106T151937Z-c86dea,rba,missing_cash_rate_target,"{""date_raw"": ""06-Nov-2026"", ""cash_rate_target"": """", ""interbank_overnight_rate"": """"}"
+2026-11-09T17:45:48+00:00,20261109T174547Z-b02aa3,rba,missing_cash_rate_target,"{""date_raw"": ""09-Nov-2026"", ""cash_rate_target"": """", ""interbank_overnight_rate"": """"}"

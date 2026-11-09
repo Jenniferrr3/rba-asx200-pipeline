@@ -24,3 +24,8 @@ ts_utc,run_id,source,rule,rows_in,rows_passed,rows_quarantined,rows_flagged
 2026-11-06T15:19:38+00:00,20261106T151937Z-c86dea,rba,flag:interbank_rate_blank_kept,4012,4011,0,0
 2026-11-06T15:19:40+00:00,20261106T151937Z-c86dea,asx200,_total,508,508,0,0
 2026-11-06T15:19:40+00:00,20261106T151937Z-c86dea,asx200,flag:zero_or_missing_volume_set_blank,508,508,0,2
+2026-11-09T17:45:48+00:00,20261109T174547Z-b02aa3,rba,_total,4013,4012,1,0
+2026-11-09T17:45:48+00:00,20261109T174547Z-b02aa3,rba,missing_cash_rate_target,4013,4012,1,0
+2026-11-09T17:45:48+00:00,20261109T174547Z-b02aa3,rba,flag:interbank_rate_blank_kept,4013,4012,0,0
+2026-11-09T17:45:49+00:00,20261109T174547Z-b02aa3,asx200,_total,506,506,0,0
+2026-11-09T17:45:49+00:00,20261109T174547Z-b02aa3,asx200,flag:zero_or_missing_volume_set_blank,506,506,0,2
